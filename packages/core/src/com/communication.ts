@@ -287,6 +287,14 @@ export class Communication {
         return this.rootEnvName;
     }
 
+    public getEnvUrl(endPoint: Environment<string, 'worker' | 'window' | 'iframe'>) {
+        if (endPoint.envType === 'iframe' || endPoint.envType === 'window') {
+            return getEnvUrl(this.topology.publicPath || '/', endPoint.env, 'web');
+        } else {
+            return getEnvUrl(this.topology.publicPath || '/', endPoint.env, 'webworker');
+        }
+    }
+
     private mapAPIMultiTenantFunctions(id: string, api: APIService): void {
         const serviceConfig = api[SERVICE_CONFIG];
         if (serviceConfig) {
@@ -539,11 +547,11 @@ export class Communication {
  * We only use the default factories so as a solution to pass the config name we append the location.search
  */
 const defaultWorkerFactory = (envName: string, instanceId: string, publicPath: string = '/') => {
-    return new Worker(`${publicPath}${envName}.webworker.js${location.search}`, { name: instanceId });
+    return new Worker(getEnvUrl(publicPath, envName, 'webworker'), { name: instanceId });
 };
 
 const defaultSourceFactory = (envName: string, _instanceId: string, publicPath: string = '/') => {
-    return `${publicPath}${envName}.web.js${location.search}`;
+    return getEnvUrl(publicPath, envName, 'web');
 };
 
 const removeMessageArgs = (message: Message): Message => {
@@ -556,3 +564,7 @@ const removeMessageArgs = (message: Message): Message => {
     }
     return message;
 };
+
+function getEnvUrl(publicPath: string, envName: string, envType: 'webworker' | 'web'): string {
+    return `${publicPath}${envName}.${envType}.js${typeof location !== 'undefined' ? location.search : ''}`;
+}

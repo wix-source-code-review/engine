@@ -160,25 +160,25 @@ describe('Node communication', () => {
             'server-host': `http://localhost:${port}`
         });
 
+        const activeSocketPromise = new Promise<io.Socket>(res =>
+            socketServer.on('connection', sock => {
+                res(sock);
+            })
+        );
+
         const { onDisconnect } = await clientCom.connect({
             env: 'server-host',
             envType: 'node',
             endpointType: 'single'
         });
 
-        onDisconnect(spy);
-        await disposables.dispose();
-        // waiting for spy function to have called
-        await waitFor(
-            () => {
-                expect(spy.callCount).to.be.greaterThan(0);
-            },
-            {
-                timeout: 2_000
-            }
-        );
+        const activeSocket = await activeSocketPromise;
 
-        // checking spy was called only once
-        expect(spy.callCount).to.eq(1);
+        onDisconnect(spy);
+        activeSocket.disconnect();
+        // waiting for spy function to have called
+        await waitFor(() => {
+            expect(spy.callCount).to.eq(1);
+        });
     });
 });

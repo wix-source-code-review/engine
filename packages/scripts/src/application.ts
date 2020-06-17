@@ -9,6 +9,9 @@ import io from 'socket.io';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import fs from '@file-services/node';
+import ts from 'typescript';
+import { createBaseHost, createLanguageServiceHost } from '@file-services/typescript';
+import { SchemaBuilder } from '@wixc3/typescript-schema-extract';
 import { TopLevelConfig, SetMultiMap } from '@wixc3/engine-core';
 
 import { loadFeaturesFromPackages } from './analyze-feature';
@@ -36,6 +39,7 @@ import { resolvePackages } from './utils/resolve-packages';
 import generateFeature, { pathToFeaturesDirectory } from './feature-generator';
 import { createFeaturesEngineRouter, generateConfigName } from './engine-router';
 import { filterEnvironments } from './utils/environments';
+import { IFileSystemSync } from '@file-services/types';
 
 const rimraf = promisify(rimrafCb);
 const { basename, extname, join } = fs;
@@ -425,6 +429,70 @@ export class Application {
             templatesDirPath,
             featureDirNameTemplate,
         });
+    }
+
+    private createTsService(filePaths: string[]) {
+        const baseHost = createBaseHost(fs);
+        const compilerOptions: ts.CompilerOptions = { module: ts.ModuleKind.CommonJS };
+        const tsHost = createLanguageServiceHost(
+            baseHost,
+            () => filePaths,
+            () => compilerOptions,
+            '/node_modules/typescript/lib'
+        );
+
+        const tsService = ts.createLanguageService(tsHost);
+        return tsService;
+    }
+
+    public async generateDocs({ featureName }: { featureName: string }) {
+        const { features } = this.analyzeFeatures();
+        const featureSchemas: { name: string; schema: any }[] = [];
+
+        console.time('Building schemas...');
+
+        const tsService = this.createTsService([...features.values()].map(({ filePath }) => filePath));
+        const program = tsService.getProgram();
+
+        if (!program) {
+            throw new Error(`Can't get a program for the feature files`);
+        }
+
+        const defaultSchemaBuilderSettings = {
+            useResolvedSchemasForGenerics: false,
+            followOtherFiles: false,
+            analysisMaxDepth: 30,
+            schemaMaxDepth: 30,
+            includePropertiesOfOtherFiles: true,
+            genericTypeResolutionPredicate: () => true,
+        };
+
+        const schemaBuilder = new SchemaBuilder(program, defaultSchemaBuilderSettings);
+
+        for (const [name, { filePath }] of features) {
+            const featureSchema = schemaBuilder.getModuleSchema(filePath).exportedProperties.default;
+            featureSchemas.push({ name, schema: featureSchema });
+        }
+
+        featureSchemas.sort((a, b) => (a.name > b.name ? 1 : -1));
+
+        console.timeEnd('Building schemas...');
+
+        const app = express();
+        app.use(cors());
+        const openSockets = new Set<Socket>();
+        const { port, httpServer } = await safeListeningHttpServer(8080, app);
+        httpServer.on('connection', (socket) => {
+            openSockets.add(socket);
+            socket.once('close', () => openSockets.delete(socket));
+        });
+
+        app.use('/', express.static(fs.join(this.basePath, 'feature-docs')));
+        app.use('/favicon.ico', noContentHandler);
+
+        app.use('/features', (_req, res) => res.status(200).send(featureSchemas));
+
+        console.log(`Feature API documentation is available at http://localhost:${port}`);
     }
 
     private async getEngineConfig() {

@@ -21,8 +21,10 @@
   "dependencies": {
     "@file-services/node": "^2.2.0",
     "@file-services/types": "^2.2.0",
+    "@file-services/typescript": "^2.2.0",
     "@wixc3/engine-core": "^13.0.0",
     "@wixc3/engine-core-node": "^13.0.0",
+    "@wixc3/typescript-schema-extract": "^8.1.0",
     "commander": "^5.1.0",
     "cors": "^2.8.5",
     "create-listening-server": "^1.0.0",

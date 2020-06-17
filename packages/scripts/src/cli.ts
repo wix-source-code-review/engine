@@ -243,6 +243,16 @@ program
         }
     });
 
+program.command('docs [featureName]').action(async (featureName, { path = process.cwd() }) => {
+    try {
+        const basePath = resolve(path);
+        const app = new Application({ basePath });
+        await app.generateDocs({ featureName });
+    } catch (e) {
+        printErrorAndExit(e);
+    }
+});
+
 program.parse(process.argv);
 
 function preRequire(pathsToRequire: string[], basePath: string) {

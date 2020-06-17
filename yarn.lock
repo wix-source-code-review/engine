@@ -259,6 +259,13 @@
   resolved "https://registry.yarnpkg.com/@file-services/types/-/types-2.2.0.tgz#c98430fc65040a0d30451ef621c2acb649d43051"
   integrity sha512-vvQ7yJdaJJwB+NVCd13IXxJK9tpMb38TtumpupTxk9EDr4BjVU2WtI7yhKA6dqKmlLRf9vPKgcR8V3tELYbX/Q==
 
+"@file-services/typescript@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@file-services/typescript/-/typescript-2.2.0.tgz#dc807052c6a2964897faee3bbaf545e93e3393fa"
+  integrity sha512-BSgr9dDeJ84FhGs0VaMz4WOJJgvZQOQZASF2BrvU/XKMa7Ifh1FeE6azbgv4Se5REJbHwaZPySn+XfQcKTy0Lg==
+  dependencies:
+    "@file-services/types" "^2.2.0"
+
 "@file-services/utils@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@file-services/utils/-/utils-2.2.0.tgz#85017baaeee4b14986591e027a6001ce41400332"
@@ -1318,7 +1325,7 @@
   dependencies:
     "@types/ci-info" "*"
 
-"@types/json-schema@^7.0.3":
+"@types/json-schema@^7.0.3", "@types/json-schema@^7.0.4":
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.4.tgz#38fd73ddfd9b55abb1e1b2ed578cb55bd7b7d339"
   integrity sha512-8+KAKzEvSUdeo+kmqnKrqgeE+LcA0tjYWFY7RPProVYwnqDjukzO+3b6dLD56rYX5TdWejnEOLJYOIeh4CXKuA==
@@ -1720,6 +1727,20 @@
     "@webassemblyjs/ast" "1.9.0"
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
+
+"@wixc3/typescript-schema-core@^8.0.1":
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/@wixc3/typescript-schema-core/-/typescript-schema-core-8.0.1.tgz#b326f548a4c9bbc287075512d1387fd530f935d3"
+  integrity sha512-XK/Rf5LFgUVheSsC/mT132PKrN/J7sViTnQkJd3tVbY2Y9qy0duxPsvxlM/PBoTrAC9X2zrQWZO2IZKkRUwkBw==
+  dependencies:
+    "@types/json-schema" "^7.0.4"
+
+"@wixc3/typescript-schema-extract@^8.1.0":
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/@wixc3/typescript-schema-extract/-/typescript-schema-extract-8.1.0.tgz#909b9cf5b92a949762776f3ac95fc68baa6dcdb4"
+  integrity sha512-dB1zjKJYdZlpLJGA3OcukFUtxAGbWQIEzp+n79h9XdEGK72hYIg7KxhVAvU80aiIHEZ19D0jfluBTyDT8DjXqA==
+  dependencies:
+    "@wixc3/typescript-schema-core" "^8.0.1"
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
